@@ -1,0 +1,50 @@
+name: Build C++ To-Do App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up C++ (g++)
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: latest
+        if: runner.os == 'Linux'
+
+      - name: Build on Linux
+        if: runner.os == 'Linux'
+        run: |
+          g++ main.cpp -std=c++17 -O2 -o todo
+          ls -lh
+
+      - name: Build on Windows
+        if: runner.os == 'Windows'
+        run: |
+          g++ main.cpp -std=c++17 -O2 -o todo.exe
+          dir
+
+      - name: Upload build artifact (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-linux
+          path: ./todo
+
+      - name: Upload build artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-windows
+          path: ./todo.exe
